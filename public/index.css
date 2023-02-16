@@ -1,0 +1,37 @@
+html {
+  width: 100vw;
+  height: 100vh;
+}
+
+body {
+  margin: 0;
+  font-family: "Urbanist", "Comfortaa", "Kanit", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
+    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  /*-webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;*/
+  min-width: 100vw;
+  min-height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* make scroll bars thin */
+
+::-webkit-scrollbar {
+  width: 0.1rem;
+  height: 0.1rem;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

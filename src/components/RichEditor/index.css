@@ -1,0 +1,37 @@
+.ql-editor {
+  /*min-height: 300px !important;*/
+}
+
+.ql-container {
+  box-sizing: border-box;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 16px;
+  height: 100%;
+  margin: 0;
+  position: relative;
+}
+
+.mydisplay > blockquote {
+  margin-top: 1em;
+  border-left: 5px solid gray;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  padding-left: 16px;
+}
+
+.mydisplay > pre {
+  margin-top: 1.5em;
+  background: #111111;
+  color: chartreuse;
+  border-radius: 8px;
+  border: 1px solid gray;
+  padding: 10px;
+}
+.mydisplay > p {
+  margin-top: 1em;
+}
+
+.mydisplay > * {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}

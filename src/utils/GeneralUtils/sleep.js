@@ -1,0 +1,9 @@
+/**
+ * @param milliseconds
+ * @returns {Promise<unknown>}
+ */
+const sleep = async (milliseconds) => {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+};
+
+export default sleep;
