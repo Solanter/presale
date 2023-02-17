@@ -3,7 +3,7 @@ import RTL from "./components/RTL";
 import createCustomTheme from "./themes";
 import ThemeProvider from "@mui/system/ThemeProvider";
 import CssBaseline from "@mui/material/CssBaseline";
-import { HashRouter } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { appRoutes } from "./routes";
 import renderRoutes from "./renderRoutes";
 import WalletContextProvider from "./context/WalletContext";
@@ -40,9 +40,9 @@ export function App() {
                       <WalletContextProvider
                         chain={getChain(process.env.REACT_APP_CHAIN_ID)}
                       >
-                        <HashRouter>
+                        <BrowserRouter>
                           {renderRoutes({ routes: appRoutes })}
-                        </HashRouter>
+                        </BrowserRouter>
                       </WalletContextProvider>
                     </OnBoardProvider>
                   </RTL>

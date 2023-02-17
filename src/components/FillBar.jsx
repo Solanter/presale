@@ -15,7 +15,7 @@ const barLoad = keyframes`
 
 export const FillBar = ({ percentage, raised = 2365, total = 10000 }) => {
   const theme = useTheme();
-
+  console.log("percentage", percentage);
   return (
     <Box
       style={{
@@ -28,6 +28,9 @@ export const FillBar = ({ percentage, raised = 2365, total = 10000 }) => {
         animationFillMode: "both",
         animationTimingFunction: "cubic-bezier(0.6, 0.2, 0.1, 1)",
         transformOrigin: "left",
+        position: "relative",
+        height: "100%",
+        width: "100%",
       }}
     >
       <Box
@@ -37,6 +40,12 @@ export const FillBar = ({ percentage, raised = 2365, total = 10000 }) => {
           width: `${100 - percentage}%`,
           color: "yellow",
           fontWeight: 700,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          zIndex: -1,
           //margin: 'auto',
         }}
         sx={{
@@ -45,12 +54,34 @@ export const FillBar = ({ percentage, raised = 2365, total = 10000 }) => {
           textAlign: "center",
           fontSize: "1.2rem",
         }}
+      ></Box>
+      <Box
+        SX={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          zIndex: 1,
+        }}
       >
-        {"  $" +
-          formatMoneyNumber(raised) +
-          " / $" +
-          formatMoneyNumber(total) +
-          " Raised"}
+        <div
+          style={{
+            margin: "auto",
+            textAlign: "center",
+            height: "fit-content",
+          }}
+        >
+          {"  $" +
+            formatMoneyNumber(raised) +
+            " / $" +
+            formatMoneyNumber(total) +
+            " Raised"}
+        </div>
       </Box>
     </Box>
   );

@@ -1,5 +1,5 @@
 {
-  "name": "finanomy-launchpad-dapp",
+  "name": "solanter-presale-dapp",
   "source": "public/index.html",
   "dependencies": {
     "@download/blockies": "^1.0.3",
@@ -50,7 +50,8 @@
   "scripts": {
     "start": "parcel serve --no-cache public/index.html && parcel watch --no-cache  public/index.html",
     "start-cached": "parcel watch public/index.html",
-    "build": "parcel build --no-cache --reporter @parcel/reporter-bundle-buddy",
+    "build": "parcel build",
+    "build:report": "parcel build --no-cache --reporter @parcel/reporter-bundle-buddy",
     "lint": "eslint .",
     "lint:fix": "eslint --fix ./src/**/*.{js,jsx,ts,tsx}",
     "format": "prettier --write .",

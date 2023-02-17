@@ -41,23 +41,23 @@ export function getFormattedTimeAsString(timeInMillis) {
   let sentence = "";
 
   if (years > 0) {
-    sentence += years + " years ";
+    sentence += years + (years > 1 ? " years " : " year ");
   }
   if (months > 0) {
-    sentence += months + " months ";
+    sentence += months + (months > 1 ? " months " : " month ");
   }
   if (days > 0) {
-    sentence += days + " days ";
+    sentence += days + (days > 1 ? " days " : " day ");
   }
   if (hours > 0) {
-    sentence += hours + " hours ";
+    sentence += hours + (hours > 1 ? " hours " : " hour ");
   }
   if (minutes > 0) {
-    sentence += minutes + " minutes ";
+    sentence += minutes + (minutes > 1 ? " minutes " : " minute ");
   }
 
   if (seconds > 0) {
-    sentence += seconds + " seconds ";
+    sentence += seconds + (seconds > 1 ? " seconds " : " second ");
   }
 
   return sentence;

@@ -1,3 +1,5 @@
+import { ethers } from "ethers";
+
 export const formatLongNumber = (n, decimals) => {
   if (!n) return 0;
   n = Number(n);
@@ -70,4 +72,18 @@ export function formatMoneyNumber(number, minDecimals = 0, maxDecimals = 2) {
     maximumFractionDigits: maxDecimals,
     minimumFractionDigits: minDecimals,
   }).format(number);
+}
+
+export function formatMoneyBigNumber(
+  number,
+  decimals,
+  minDecimals = 0,
+  maxDecimals = 2
+) {
+  const n = ethers.utils.formatUnits(number, decimals);
+  return new Intl.NumberFormat("en-US", {
+    /*maximumSignificantDigits: 30*/
+    maximumFractionDigits: maxDecimals,
+    minimumFractionDigits: minDecimals,
+  }).format(n);
 }

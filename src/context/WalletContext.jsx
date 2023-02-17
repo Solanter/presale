@@ -159,8 +159,8 @@ export const WalletContextProvider = ({ children, chain }) => {
     return handleDisconnect();
   };
 
-  const openConnectModal = () => {
-    connect();
+  const openConnectModal = async () => {
+    await connect();
   };
 
   return (
