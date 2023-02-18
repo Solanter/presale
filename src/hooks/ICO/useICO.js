@@ -4,8 +4,11 @@ import IcoUtils from "../../web3Utils/icoUtils";
 import { useQuery } from "react-query";
 import { formatMoneyBigNumber } from "../../utils/NumberUtils/formatNumbers";
 import { getFormattedTimeAsString } from "../../utils/timeUtils";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useOutPrice from "../Uniswap/useUSDTPrice";
+import useERC20Calls from "../Web3/ERC20/useERC20Calls";
+import { ethers } from "ethers";
+import icoUtils from "../../web3Utils/icoUtils";
 
 const useICO = ({
   address,
@@ -23,6 +26,8 @@ const useICO = ({
     user: user,
     spenders: [address],
   });
+
+  const erc20Calls = useERC20Calls();
 
   const bnbBalance = useETHBalance({
     address: user,
@@ -48,17 +53,24 @@ const useICO = ({
       const hasStarted =
         data.startTime.toNumber() > 0 &&
         data.startTime.toNumber() < Date.now() / 1000;
+
       const startTimeSet = data.startTime.toNumber() > 0;
       const hasEnded =
         data.endTime.toNumber() > 0 &&
         data.endTime.toNumber() < Date.now() / 1000;
       const raisedPercentage =
-        (data.totalSold.toNumber() / data.totalPresale.toNumber()) * 100;
+        (Number(data.totalSold.toString()) /
+          Number(data.totalPresale.toString())) *
+        100;
+
       const totalTobeRaised = data.totalPresale.mul(data.usdtPrice);
       return {
         totalTobeRaised: {
-          value: totalTobeRaised,
-          formatted: formatMoneyBigNumber(totalTobeRaised, usdt.decimals.data),
+          value: ethers.utils.formatUnits(totalTobeRaised, usdtToken.decimals),
+          formatted: formatMoneyBigNumber(
+            totalTobeRaised,
+            usdtToken.decimals * 2
+          ),
           decimals: usdt.decimals.data,
         },
         raisedPercentage,
@@ -262,7 +274,13 @@ const useICO = ({
         },
         bnbReferralRewards: {
           value: data.bnbReferralRewards,
-          formatted: formatMoneyBigNumber(data.bnbReferralRewards, 18),
+          formatted: formatMoneyBigNumber(
+            data.bnbReferralRewards,
+            18,
+            0,
+            6,
+            true
+          ),
           decimals: 18,
         },
       };
@@ -289,6 +307,135 @@ const useICO = ({
     );
   }, [usdt.allowances.data, usdt.balance.data?.formatted]);
 
+  const approveUSDT = useCallback(
+    async (signer) => {
+      const tr = await erc20Calls.approve(
+        usdtToken.address,
+        signer,
+        address,
+        ethers.constants.MaxUint256
+      );
+      await usdt.allowances.refetch();
+      return tr;
+    },
+    [address, usdtToken.address]
+  );
+
+  const buyWithUSDT = useCallback(
+    async (signer, amount) => {
+      const tx = await icoUtils.buyWithUSDT({
+        address,
+        signer,
+        amount,
+      });
+      await tx?.wait?.();
+
+      await userPresaleData.refetch();
+      await presaleData.refetch();
+      await usdt.balance.refetch();
+      await usdt.allowances.refetch();
+      return tx;
+    },
+    [
+      address,
+      usdtToken.address,
+      usdt.balance,
+      usdt.allowances,
+      userPresaleData,
+      presaleData,
+    ]
+  );
+
+  const buyWithBNB = useCallback(
+    async (signer, amount) => {
+      const tx = await icoUtils.buyWithBNB({
+        address,
+        signer,
+        amount,
+      });
+      await tx?.wait?.();
+
+      await userPresaleData.refetch();
+      await presaleData.refetch();
+      await bnbPrice.refetch();
+      await bnbBalance.refetchBalance();
+      return tx;
+    },
+    [
+      address,
+      usdtToken.address,
+      userPresaleData,
+      presaleData,
+      bnbPrice,
+      bnbBalance,
+    ]
+  );
+
+  const estimateGas = useCallback(
+    async (signer) => {
+      const gasPrice = await signer.getGasPrice();
+      const icoCOntract = new ethers.Contract(address, IcoUtils.abi, signer);
+      const gasLimit = await icoCOntract.estimateGas.buyWithUSDT(
+        ethers.constants.AddressZero,
+        {
+          value: presaleData.data?.minBuy?.value
+            .mul(presaleData.data?.usdtPrice?.value)
+            .div(bnbPrice.data?.value),
+        }
+      );
+
+      return gasPrice.mul(gasLimit);
+    },
+    [address, usdtToken.address]
+  );
+
+  const claimReferalRewards = useCallback(
+    async (signer) => {
+      const tx = await icoUtils.claimReferral({
+        address,
+        signer,
+      });
+      await tx?.wait?.();
+
+      await userPresaleData.refetch();
+      await presaleData.refetch();
+      await usdt.balance.refetch();
+      await usdt.allowances.refetch();
+      await bnbBalance.refetchBalance();
+      return tx;
+    },
+    [
+      address,
+      usdtToken.address,
+      userPresaleData,
+      presaleData,
+      bnbPrice,
+      bnbBalance,
+    ]
+  );
+
+  const claimUnlockedBoughtTokens = useCallback(
+    async (signer) => {
+      const tx = await icoUtils.claimUnlocked({
+        address,
+        signer,
+      });
+      await tx?.wait?.();
+
+      await userPresaleData.refetch();
+      await presaleData.refetch();
+      return tx;
+    },
+    [
+      address,
+      usdtToken.address,
+      userPresaleData,
+      presaleData,
+      bnbPrice,
+      bnbBalance,
+    ]
+  );
+
   return {
     presaleData,
     userPresaleData,
@@ -297,6 +444,12 @@ const useICO = ({
     approved,
     hasUsdtBalance,
     bnbPrice,
+    approveUSDT,
+    buyWithUSDT,
+    buyWithBNB,
+    estimateGas,
+    claimReferalRewards,
+    claimUnlockedBoughtTokens,
   };
 };
 

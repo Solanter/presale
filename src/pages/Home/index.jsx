@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/system";
 import Button from "@mui/material/Button";
-import { createRef, useEffect } from "react";
+import { createRef, useCallback, useState } from "react";
 import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
 import { FillBar } from "../../components/FillBar";
@@ -26,6 +26,11 @@ import {
   formatMoneyNumber,
 } from "../../utils/NumberUtils/formatNumbers";
 import { ethers } from "ethers";
+import useReferrals from "../../hooks/useReferrals";
+import useConfigs from "../../hooks/useConfigs";
+import { BuyModal } from "../../components/MaxAmountField";
+import BarredProgress from "../../components/Progress/BarredProgress";
+import Link from "@mui/material/Link";
 
 const logoUrl = new URL(
   "../../../public/logo.png?as=webp&height=120",
@@ -48,6 +53,7 @@ const usdt = new URL("../../../public/images/tokens/usdt.svg", import.meta.url)
   .href;
 
 const HomePage = () => {
+  useReferrals();
   const hoToBuyRef = createRef();
   const buyRef = createRef();
   const referalRef = createRef();
@@ -75,6 +81,9 @@ const HomePage = () => {
         <div ref={hoToBuyRef} />
         <HowToBuy scrollToBuy={scrollToBuy} />
         <Box sx={{ minHeight: 40 }} />
+        <HowToBuy2 scrollToBuy={scrollToBuy} />
+        <Box sx={{ minHeight: 40 }} />
+
         <div ref={buyRef} />
         <IcoDashboard scrollToBuy={scrollToBuy} />
         <Box sx={{ minHeight: 40 }} />
@@ -89,7 +98,14 @@ const HomePage = () => {
 export default HomePage;
 
 const ReferralDashboard = ({ scrollToBuy }) => {
-  const { address, openConnectModal, chain, provider } = useWalletContext();
+  const {
+    address,
+    openConnectModal,
+    chain,
+    provider,
+    signer,
+    isCorrectNetwork,
+  } = useWalletContext();
   const ico = useICO({
     address: icoConfigs.ico,
     saleToken: icoConfigs.solanter,
@@ -100,12 +116,11 @@ const ReferralDashboard = ({ scrollToBuy }) => {
     chainID: chain.id,
     provider,
   });
+
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
 
-  useEffect(() => {
-    console.log(ico);
-  }, [ico]);
+  const [loading, setLoading] = useState(false);
 
   return (
     <>
@@ -130,7 +145,8 @@ const ReferralDashboard = ({ scrollToBuy }) => {
             ) : (
               <Skeleton sx={{ display: "inline-block", width: "2em" }} />
             )}{" "}
-            in BNB and USDT on every transaction made by your referrals
+            of Each Sale you refer, you will get paid in either BNB or USDT
+            anytime someone purchases SOLT from your referral link.
           </Typography>
           <Box sx={{ minHeight: 40 }} />
           <Box
@@ -141,8 +157,10 @@ const ReferralDashboard = ({ scrollToBuy }) => {
               width: "100%",
               gap: 2,
               p: 2,
+              pt: 1,
+              pb: 1,
               borderRadius: "24px",
-              backgroundColor: "#0005",
+              backgroundColor: (theme) => theme.palette.background.paper,
               backdropFilter: "blur(3px)",
               position: "relative",
               zIndex: 1,
@@ -236,18 +254,200 @@ const ReferralDashboard = ({ scrollToBuy }) => {
                 color={"primary"}
                 onClick={async () => {
                   await openConnectModal();
-                  console.log(performance.now());
+
                   setTimeout(() => {
-                    console.log(performance.now());
                     scrollToBuy();
                   }, 500);
                 }}
               >
-                Connect Wallet
+                Connect Wallet to get Referral Link
               </Button>
             )}
           </Box>
-
+          <Box sx={{ minHeight: 10 }} />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              gap: 2,
+              p: 2,
+              pt: 1,
+              pb: 1,
+              borderRadius: "24px",
+              backgroundColor: (theme) => theme.palette.background.paper,
+              backdropFilter: "blur(3px)",
+              position: "relative",
+              zIndex: 1,
+              [theme.breakpoints.down("sm")]: {
+                flexDirection: "column",
+              },
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 2,
+              }}
+            >
+              <FeatherIcon size={24} icon={"code"} />
+              <Typography
+                variant={"body2"}
+                sx={{ fontSize: "1em", fontWeight: 500 }}
+              >
+                Presale Contract Address
+              </Typography>
+            </Box>
+            {
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 1,
+                  [theme.breakpoints.down("sm")]: {
+                    flexDirection: "column",
+                  },
+                }}
+              >
+                <Typography
+                  variant={"body2"}
+                  sx={{
+                    fontSize: "0.8em",
+                    fontWeight: 500,
+                    fontFamily: "monospace",
+                  }}
+                >
+                  {`${icoConfigs.ico}`}
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Tooltip title={"Copy Address"}>
+                    <IconButton
+                      size={"small"}
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${icoConfigs.ico}`);
+                        enqueueSnackbar("Copied to clipboard", {
+                          variant: "success",
+                        });
+                      }}
+                    >
+                      <FeatherIcon size={24} icon={"copy"} />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title={"View On Explorer"}>
+                    <IconButton
+                      target={"_blank"}
+                      href={`${chain.explorer}address/${icoConfigs.ico}#code`}
+                    >
+                      <FeatherIcon size={24} icon={"link-2"} />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </Box>
+            }
+          </Box>
+          <Box sx={{ minHeight: 10 }} />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              gap: 2,
+              p: 2,
+              pt: 1,
+              pb: 1,
+              borderRadius: "24px",
+              backgroundColor: (theme) => theme.palette.background.paper,
+              backdropFilter: "blur(3px)",
+              position: "relative",
+              zIndex: 1,
+              [theme.breakpoints.down("sm")]: {
+                flexDirection: "column",
+              },
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 2,
+              }}
+            >
+              <FeatherIcon size={24} icon={"code"} />
+              <Typography
+                variant={"body2"}
+                sx={{ fontSize: "1em", fontWeight: 500 }}
+              >
+                SOLT Token Address
+              </Typography>
+            </Box>
+            {
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 1,
+                  [theme.breakpoints.down("sm")]: {
+                    flexDirection: "column",
+                  },
+                }}
+              >
+                <Typography
+                  variant={"body2"}
+                  sx={{
+                    fontSize: "0.8em",
+                    fontWeight: 500,
+                    fontFamily: "monospace",
+                  }}
+                >
+                  {`${icoConfigs.solanter.address}`}
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Tooltip title={"Copy Address"}>
+                    <IconButton
+                      size={"small"}
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          `${icoConfigs.solanter.address}`
+                        );
+                        enqueueSnackbar("Copied to clipboard", {
+                          variant: "success",
+                        });
+                      }}
+                    >
+                      <FeatherIcon size={24} icon={"copy"} />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title={"View On Explorer"}>
+                    <IconButton
+                      target={"_blank"}
+                      href={`${chain.explorer}token/${icoConfigs.solanter.address}#balances`}
+                    >
+                      <FeatherIcon size={24} icon={"link-2"} />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </Box>
+            }
+          </Box>
           {address && (
             <>
               <Box sx={{ minHeight: 10 }} />
@@ -260,7 +460,7 @@ const ReferralDashboard = ({ scrollToBuy }) => {
                   gap: 2,
                   p: 2,
                   borderRadius: "24px",
-                  backgroundColor: "#0005",
+                  backgroundColor: (theme) => theme.palette.background.paper,
                   backdropFilter: "blur(3px)",
                   position: "relative",
                   zIndex: 1,
@@ -309,7 +509,7 @@ const ReferralDashboard = ({ scrollToBuy }) => {
                   gap: 2,
                   p: 2,
                   borderRadius: "24px",
-                  backgroundColor: "#0005",
+                  backgroundColor: (theme) => theme.palette.background.paper,
                   backdropFilter: "blur(3px)",
                   position: "relative",
                   zIndex: 1,
@@ -358,10 +558,14 @@ const ReferralDashboard = ({ scrollToBuy }) => {
               >
                 <Button
                   disabled={
-                    ico.userPresaleData.data?.bnbReferralRewards?.value?.toNumber() ===
-                      0 &&
-                    ico.userPresaleData.data?.usdtReferralRewards?.value?.toNumber() ===
+                    (ico.userPresaleData.data?.bnbReferralRewards?.value?.eq(
                       0
+                    ) &&
+                      ico.userPresaleData.data?.usdtReferralRewards?.value?.eq(
+                        0
+                      )) ||
+                    loading ||
+                    !isCorrectNetwork
                   }
                   variant={"contained"}
                   sx={{
@@ -372,8 +576,27 @@ const ReferralDashboard = ({ scrollToBuy }) => {
                     letterSpacing: "1px",
                     minWidth: "40%",
                   }}
+                  onClick={async () => {
+                    setLoading(true);
+                    ico
+                      .claimReferalRewards(signer)
+                      .then(() => {
+                        enqueueSnackbar("Claimed referral rewards", {
+                          variant: "success",
+                        });
+                      })
+                      .catch((e) => {
+                        enqueueSnackbar(e.reason || e.message, {
+                          variant: "error",
+                        });
+                      })
+                      .finally(() => {
+                        setLoading(false);
+                      });
+                  }}
                 >
-                  Claim All Rewards
+                  {loading && <BarredProgress sx={{ mr: 1 }} width={18} />}
+                  {isCorrectNetwork ? `Claim All Rewards` : `Wrong Network`}
                 </Button>
               </Box>
             </>
@@ -388,6 +611,7 @@ ReferralDashboard.propTypes = {
 };
 const IcoDashboard = ({ scrollToBuy }) => {
   const walletContext = useWalletContext();
+  const { enqueueSnackbar } = useSnackbar();
   const { address, chain, provider } = useWalletContext();
   const ico = useICO({
     address: icoConfigs.ico,
@@ -399,6 +623,15 @@ const IcoDashboard = ({ scrollToBuy }) => {
     chainID: chain.id,
     provider,
   });
+  const [busy, setBusy] = useState(false);
+
+  const [selectedCurrency, setSelectedCurrency] = useState("BNB");
+  const [open, setOpen] = useState(false);
+  const openBuyModal = useCallback((currency) => {
+    setSelectedCurrency(currency);
+    setOpen(true);
+  }, []);
+
   return (
     <Box
       sx={{
@@ -414,14 +647,37 @@ const IcoDashboard = ({ scrollToBuy }) => {
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
+        pt: 1,
+        pb: 1,
       }}
     >
+      <BuyModal
+        open={open}
+        balance={
+          selectedCurrency === "BNB"
+            ? ico.bnbBalance.balance
+            : ico.usdt.balance.data
+        }
+        currency={selectedCurrency}
+        setOpen={(o) => {
+          setOpen(o);
+        }}
+        decimals={selectedCurrency === "BNB" ? 18 : ico.usdt.decimals.data}
+        minBuy={ico.presaleData.data?.minBuy}
+        account={walletContext.address}
+        bnbPrice={ico.bnbPrice.data}
+        salePrice={ico.presaleData.data?.usdtPrice}
+        buyFunction={
+          selectedCurrency === "BNB" ? ico.buyWithBNB : ico.buyWithUSDT
+        }
+      />
       <Overlay />
-      <Container maxWidth={"md"}>
+      <Container maxWidth={"md"} sx={{ p: 1 }}>
         <Grid
           container
           sx={{
             zIndex: 1,
+            p: 0,
           }}
           spacing={2}
         >
@@ -489,7 +745,7 @@ const IcoDashboard = ({ scrollToBuy }) => {
                         ? ico.presaleData.data?.listingTime?.seconds
                         : ico.presaleData.data?.endTime?.seconds
                       : ico.presaleData.data?.startTime?.seconds > 0
-                      ? ico.presaleData.data?.startTime?.seconds > 0
+                      ? ico.presaleData.data?.startTime?.seconds
                       : (Date.now() + 24 * 60 * 60 * 1000 * 10) / 1000
                   }
                 />
@@ -549,16 +805,12 @@ const IcoDashboard = ({ scrollToBuy }) => {
                         !walletContext.isCorrectNetwork
                       ) {
                         await walletContext.requestSwitchNetwork();
-                        console.log(performance.now());
                         setTimeout(() => {
-                          console.log(performance.now());
                           scrollToBuy();
                         }, 500);
                       } else {
                         await walletContext.openConnectModal();
-                        console.log(performance.now());
                         setTimeout(() => {
-                          console.log(performance.now());
                           scrollToBuy();
                         }, 500);
                       }
@@ -601,7 +853,7 @@ const IcoDashboard = ({ scrollToBuy }) => {
                           },
                         }}
                         onClick={async () => {
-                          console.log("handle Buy");
+                          openBuyModal("BNB");
                         }}
                       >
                         Buy With BNB
@@ -611,7 +863,7 @@ const IcoDashboard = ({ scrollToBuy }) => {
                           ico.presaleData.data?.hasEnded ||
                           !ico.presaleData.data?.hasStarted ||
                           !ico.hasUsdtBalance ||
-                          !ico.approved
+                          busy
                         }
                         variant={"contained"}
                         sx={{
@@ -629,12 +881,25 @@ const IcoDashboard = ({ scrollToBuy }) => {
                         }}
                         onClick={async () => {
                           if (!ico.approved) {
-                            // approve
+                            setBusy(true);
+                            try {
+                              await ico.approveUSDT(walletContext.signer);
+                              enqueueSnackbar("Approved USDT", {
+                                variant: "success",
+                              });
+                            } catch (e) {
+                              enqueueSnackbar(e.reason || e.message, {
+                                variant: "error",
+                              });
+                            } finally {
+                              setBusy(false);
+                            }
                           } else {
-                            // buy
+                            openBuyModal("USDT");
                           }
                         }}
                       >
+                        {busy && <BarredProgress sx={{ mr: 1 }} width={18} />}
                         {ico.approved ? `Buy With USDT` : `Approve USDT`}
                       </Button>
                     </Box>
@@ -681,7 +946,8 @@ const IcoDashboard = ({ scrollToBuy }) => {
                 title={"Unlock Interval"}
                 value={ico.presaleData.data?.vestingInterval.formatted}
                 tooltip={
-                  "The tokens are vested over the period and unlocks new tokens every day"
+                  "The tokens are vested over the period and unlocks new tokens every " +
+                  ico.presaleData.data?.vestingInterval.formatted
                 }
               />
               <Divider
@@ -743,7 +1009,8 @@ const IcoDashboard = ({ scrollToBuy }) => {
                   !walletContext.isConnected ||
                   !walletContext.isCorrectNetwork ||
                   ico.userPresaleData.data?.claimableAmount?.value?.eq(0) ||
-                  ico.presaleData.data?.listingTime?.miliseconds > Date.now()
+                  ico.presaleData.data?.listingTime?.miliseconds > Date.now() ||
+                  busy
                 }
                 variant={"contained"}
                 sx={{
@@ -759,10 +1026,21 @@ const IcoDashboard = ({ scrollToBuy }) => {
                     color: "white",
                   },
                 }}
-                onClick={() => {
-                  // handle claim
+                onClick={async () => {
+                  try {
+                    setBusy(true);
+                    await ico.claimUnlockedBoughtTokens(walletContext.signer);
+                    enqueueSnackbar("Claimed", { variant: "success" });
+                  } catch (e) {
+                    enqueueSnackbar(e.reason || e.message, {
+                      variant: "error",
+                    });
+                  } finally {
+                    setBusy(false);
+                  }
                 }}
               >
+                {busy && <BarredProgress sx={{ mr: 1 }} width={18} />}
                 Claim Tokens
               </Button>
             </DarkCard>
@@ -796,7 +1074,10 @@ const LineDetails = ({ title, value, tooltip }) => {
           sx={{
             fontSize: "1em",
             fontWeight: 800,
-            color: "#c1c1c1",
+            color: (theme) =>
+              theme.palette.mode == "light"
+                ? theme.palette.primary.dark
+                : "#c1c1c1",
             display: "flex",
             gap: 1,
           }}
@@ -893,6 +1174,9 @@ const Description = ({ onHowToBuyCick, scrollToBuy, scrollToReferral }) => {
               fontWeight: "900",
               letterSpacing: "1px",
               minWidth: "40%",
+              [theme.breakpoints.down("sm")]: {
+                minWidth: "80%",
+              },
             }}
             onClick={scrollToReferral}
           >
@@ -908,6 +1192,9 @@ const Description = ({ onHowToBuyCick, scrollToBuy, scrollToReferral }) => {
               fontWeight: "900",
               letterSpacing: "1px",
               minWidth: "40%",
+              [theme.breakpoints.down("sm")]: {
+                minWidth: "80%",
+              },
             }}
             onClick={onHowToBuyCick}
           >
@@ -943,6 +1230,115 @@ Description.propTypes = {
   onHowToBuyCick: PropTypes.func.isRequired,
   scrollToBuy: PropTypes.func.isRequired,
   scrollToReferral: PropTypes.func.isRequired,
+};
+
+const HowToBuy2 = ({ scrollToBuy }) => {
+  return (
+    <Paper
+      sx={{
+        minHeight: "80vh",
+        border: "5px solid #ffffff55",
+        backgroundColor: (theme) => theme.palette.background.default + "cc",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: "24px",
+      }}
+    >
+      <Container
+        maxWidth={"sm"}
+        sx={{
+          backdropFilter: "blur(10px)",
+          backgroundColor: (theme) => theme.palette.background.paper + "99",
+          borderRadius: "24px",
+          pt: 6,
+          pb: 7,
+          mt: 4,
+          mb: 4,
+        }}
+      >
+        <Typography variant={"h5"}>Buy BNB with card</Typography>
+        <Box sx={{ minHeight: 10 }} />
+        <Typography variant={"body2"} sx={{ fontSize: "1em" }}>
+          Visit{" "}
+          <Link
+            href={"https://www.moonpay.com/buy"}
+            target={"_blank"}
+            sx={{ color: "#1A63A6", fontWeight: 800 }}
+          >
+            MoonPay
+          </Link>{" "}
+          this will allow you to purchase BNB that will be sent to your wallet.
+          You will then be able to use this BNB to purchase SOLT. Visit{" "}
+          <Link
+            href={"https://www.moonpay.com/buy"}
+            target={"_blank"}
+            sx={{ color: "#1A63A6", fontWeight: 800 }}
+          >
+            MoonPay
+          </Link>{" "}
+          to begin and follow the on screen steps. We recommend purchasing a
+          minimum $10 worth of BNB to cover the minimum SOLT purchase.
+        </Typography>
+
+        <br />
+        <Typography variant={"h5"}>Buy SOLT with BNB</Typography>
+        <Box sx={{ minHeight: 10 }} />
+        <Typography variant={"body2"} sx={{ fontSize: "1em" }}>
+          Once you have sufficient BNB in your wallet (if you do not have enough
+          USDT or BNB, please read option 1 first), you can now swap your BNB
+          for SOLT. Type in the amount of SOLT you wish to purchase ($10 minimum
+          ) click “Buy with BNB”. Your wallet provider will ask you to confirm
+          the transaction and will also show you the cost of gas
+        </Typography>
+
+        <br />
+        <Typography variant={"h5"}>Buy SOLT with USDT</Typography>
+        <Box sx={{ minHeight: 10 }} />
+        <Typography variant={"body2"} sx={{ fontSize: "1em" }}>
+          Please ensure you have at least $20 of USDT in your wallet before
+          commencing the transaction. Type in the amount of SOLT you wish to
+          purchase ($15 minimum). Click “Convert USDT”. You will then be asked
+          to approve the purchase TWICE. The first approval is for the USDT
+          contract and the second is for the transaction amount. Please ensure
+          you go through both approval steps in order to complete the
+          transaction.
+        </Typography>
+        <br />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Button
+            variant={"contained"}
+            sx={{
+              backgroundColor: "white",
+              color: (theme) => theme.palette.primary.light,
+              textTransform: "none",
+              p: "12px 32px",
+              borderRadius: "50px",
+              fontWeight: "900",
+              letterSpacing: "1px",
+              minWidth: "40%",
+              "&:hover": {
+                color: "white",
+              },
+            }}
+            onClick={scrollToBuy}
+          >
+            Buy Now
+          </Button>
+        </Box>
+      </Container>
+    </Paper>
+  );
+};
+
+HowToBuy2.propTypes = {
+  scrollToBuy: PropTypes.func.isRequired,
 };
 
 const HowToBuy = ({ scrollToBuy }) => {
@@ -1040,6 +1436,8 @@ HowToBuy.propTypes = {
 };
 
 const Header = ({ scrollToBuy }) => {
+  const settings = useConfigs();
+
   return (
     <Box
       sx={{
@@ -1051,19 +1449,40 @@ const Header = ({ scrollToBuy }) => {
     >
       <SocialIcons />
       <img src={logoUrl} />
-      <Button
-        variant={"contained"}
+      <Box
         sx={{
-          textTransform: "none",
-          p: "12px 32px",
-          borderRadius: "50px",
-          fontWeight: "900",
-          letterSpacing: "1px",
+          display: "flex",
+          gap: 1,
         }}
-        onClick={scrollToBuy}
       >
-        Buy Now
-      </Button>
+        <Button
+          variant={"contained"}
+          sx={{
+            textTransform: "none",
+            p: "12px 32px",
+            borderRadius: "50px",
+            fontWeight: "900",
+            letterSpacing: "1px",
+          }}
+          onClick={scrollToBuy}
+        >
+          Buy Now
+        </Button>
+        {/* add a light/dark mode toggle */}
+        <CircleIconButton
+          icon={
+            <FeatherIcon
+              icon={settings.configs.themeMode === "light" ? "moon" : "sun"}
+            />
+          }
+          onClick={() => {
+            settings.saveConfigs({
+              themeMode:
+                settings.configs.themeMode === "light" ? "dark" : "light",
+            });
+          }}
+        />
+      </Box>
     </Box>
   );
 };
@@ -1139,7 +1558,10 @@ const Overlay = () => (
   <Box
     sx={{
       position: "absolute",
-      backgroundColor: "#0005",
+      backgroundColor: (theme) =>
+        theme.palette.mode === "light"
+          ? theme.palette.background.paper + "ee"
+          : theme.palette.background.paper + "66",
       zIndex: 0,
       top: 0,
       left: 0,
@@ -1162,7 +1584,10 @@ const DarkCard = ({ children, sx, ...props }) => {
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "column",
-        backgroundColor: "#0009",
+        backgroundColor: (theme) =>
+          theme.palette.mode === "light"
+            ? theme.palette.background.default + 55
+            : theme.palette.background.default + "66",
         gap: 2,
         backdropFilter: "blur(10px)",
         height: "100%",

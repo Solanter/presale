@@ -2,6 +2,7 @@ import erc20Transfer from "../../../web3Utils/ERC20Utils/erc20Transfer";
 import useQueryClient from "../../Query/useQueryClient";
 import erc20TransferFrom from "../../../web3Utils/ERC20Utils/erc20TransferFrom";
 import erc20Approve from "../../../web3Utils/ERC20Utils/erc20Approve";
+import { useCallback } from "react";
 
 /**
  *
@@ -17,7 +18,7 @@ const useERC20Calls = () => {
    * @param amount{String | Number | import('ethers').BigNumber} - The amount to send
    * @returns {Promise<import('@ethersproject/abstract-provider').TransactionReceipt>}
    */
-  const transfer = async (tokenAddress, signer, to, amount) => {
+  const transfer = useCallback(async (tokenAddress, signer, to, amount) => {
     const signerAddress = await signer.getAddress();
     const tx = await erc20Transfer(tokenAddress, signer, to, amount);
 
@@ -30,7 +31,7 @@ const useERC20Calls = () => {
       signerAddress,
     ]);
     return tr;
-  };
+  }, []);
 
   /**
    *
@@ -41,23 +42,32 @@ const useERC20Calls = () => {
    * @param amount{String | Number | import('ethers').BigNumber} - The amount to send
    * @returns {Promise<import('@ethersproject/abstract-provider').TransactionReceipt>}
    */
-  const transferFrom = async (tokenAddress, signer, from, to, amount) => {
-    const chainId = await signer.getChainId();
-    const signerAddress = await signer.getAddress();
-    const tx = await erc20TransferFrom(tokenAddress, signer, from, to, amount);
+  const transferFrom = useCallback(
+    async (tokenAddress, signer, from, to, amount) => {
+      const chainId = await signer.getChainId();
+      const signerAddress = await signer.getAddress();
+      const tx = await erc20TransferFrom(
+        tokenAddress,
+        signer,
+        from,
+        to,
+        amount
+      );
 
-    const tr = await tx.wait();
-    await queryClient.invalidateQueries(["erc20", "balance", from, chainId]);
-    await queryClient.invalidateQueries(["erc20", "balance", to, chainId]);
-    await queryClient.invalidateQueries([
-      "erc20",
-      "allowance",
-      tokenAddress,
-      signerAddress,
-      from,
-    ]);
-    return tr;
-  };
+      const tr = await tx.wait();
+      await queryClient.invalidateQueries(["erc20", "balance", from, chainId]);
+      await queryClient.invalidateQueries(["erc20", "balance", to, chainId]);
+      await queryClient.invalidateQueries([
+        "erc20",
+        "allowance",
+        tokenAddress,
+        signerAddress,
+        from,
+      ]);
+      return tr;
+    },
+    []
+  );
 
   /**
    * @param tokenAddress{String} - ERC20 token address
@@ -66,7 +76,7 @@ const useERC20Calls = () => {
    * @param amount{String | Number | import('ethers').BigNumber} - The amount to send
    * @returns {Promise<*>}{Promise<import('@ethersproject/abstract-provider').TransactionReceipt>}
    */
-  const approve = async (tokenAddress, signer, spender, amount) => {
+  const approve = useCallback(async (tokenAddress, signer, spender, amount) => {
     //const chainId = await signer.getChainId();
     const signerAddress = await signer.getAddress();
     const tx = await erc20Approve(tokenAddress, signer, spender, amount);
@@ -83,31 +93,8 @@ const useERC20Calls = () => {
       tokenAddress,
       signerAddress,
     ]);
-
-    /*
-    await queryClient.invalidateQueries([
-      "erc20",
-      "allowance",
-      tokenAddress,
-      signerAddress,
-      [spender],
-      chainId,
-    ]);
-
-
-    await queryClient.invalidateQueries([
-      "erc20",
-      "allowance",
-      tokenAddress,
-      signerAddress
-    ]);
-
-   */
-
     return tr;
-  };
-
+  }, []);
   return { transfer, transferFrom, approve };
 };
-
 export default useERC20Calls;

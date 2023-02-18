@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import PropTypes from "prop-types";
 import { keyframes } from "@emotion/react";
 import { useTheme } from "@mui/system";
-import { formatMoneyNumber } from "../utils/NumberUtils/formatNumbers";
 
 const barLoad = keyframes`
     from {
@@ -13,9 +12,10 @@ const barLoad = keyframes`
     }
     `;
 
-export const FillBar = ({ percentage, raised = 2365, total = 10000 }) => {
+export const FillBar = ({ percentage, raised, total }) => {
+  percentage = percentage > 90 ? 90 : percentage;
   const theme = useTheme();
-  console.log("percentage", percentage);
+
   return (
     <Box
       style={{
@@ -56,8 +56,8 @@ export const FillBar = ({ percentage, raised = 2365, total = 10000 }) => {
         }}
       ></Box>
       <Box
-        SX={{
-          position: "absolute",
+        sx={{
+          //position: "absolute",
           top: 0,
           left: 0,
           bottom: 0,
@@ -76,11 +76,7 @@ export const FillBar = ({ percentage, raised = 2365, total = 10000 }) => {
             height: "fit-content",
           }}
         >
-          {"  $" +
-            formatMoneyNumber(raised) +
-            " / $" +
-            formatMoneyNumber(total) +
-            " Raised"}
+          {"  $" + raised + " / $" + total + " Raised"}
         </div>
       </Box>
     </Box>
@@ -88,8 +84,8 @@ export const FillBar = ({ percentage, raised = 2365, total = 10000 }) => {
 };
 
 FillBar.propTypes = {
-  percentage: PropTypes.number,
-  raised: PropTypes.number,
-  total: PropTypes.number,
+  percentage: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  raised: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  total: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   symbol: PropTypes.string,
 };

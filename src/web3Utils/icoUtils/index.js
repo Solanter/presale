@@ -189,6 +189,8 @@ const getUserData = async ({ address, provider, userAddress }) => {
   };
 };
 const IcoUtils = {
+  abi,
+  getIcoContract,
   getPresaleData,
   getUserData,
   buyWithUSDT,

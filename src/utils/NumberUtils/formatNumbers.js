@@ -66,7 +66,7 @@ export function eToNumber(num) {
   }
 }
 
-export function formatMoneyNumber(number, minDecimals = 0, maxDecimals = 2) {
+export function formatMoneyNumber(number, minDecimals = 0, maxDecimals = 5) {
   return new Intl.NumberFormat("en-US", {
     /*maximumSignificantDigits: 30*/
     maximumFractionDigits: maxDecimals,
@@ -76,7 +76,7 @@ export function formatMoneyNumber(number, minDecimals = 0, maxDecimals = 2) {
 
 export function formatMoneyBigNumber(
   number,
-  decimals,
+  decimals = 18,
   minDecimals = 0,
   maxDecimals = 2
 ) {
