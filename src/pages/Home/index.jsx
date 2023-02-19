@@ -31,6 +31,7 @@ import useConfigs from "../../hooks/useConfigs";
 import { BuyModal } from "../../components/MaxAmountField";
 import BarredProgress from "../../components/Progress/BarredProgress";
 import Link from "@mui/material/Link";
+import useERC20TotalSupply from "../../hooks/Web3/ERC20/useERC20TotalSupply";
 
 const logoUrl = new URL(
   "../../../public/logo.png?as=webp&height=120",
@@ -51,6 +52,10 @@ const bnb = new URL("../../../public/images/tokens/bnb.svg", import.meta.url)
   .href;
 const usdt = new URL("../../../public/images/tokens/usdt.svg", import.meta.url)
   .href;
+
+const phone = new URL("../../../public/images/phone.svg", import.meta.url);
+const wallet = new URL("../../../public/images/wallet.svg", import.meta.url);
+const hand = new URL("../../../public/images/hand.svg", import.meta.url);
 
 const HomePage = () => {
   useReferrals();
@@ -90,12 +95,359 @@ const HomePage = () => {
         <div ref={referalRef} />
         <ReferralDashboard scrollToBuy={scrollToReferral} />
         <Box sx={{ minHeight: 40 }} />
+        <ContractData />
+        <Box sx={{ minHeight: 40 }} />
       </Container>
     </Page>
   );
 };
 
 export default HomePage;
+
+const ContractData = () => {
+  const { chain, provider } = useWalletContext();
+
+  const solanterTotalSupply = useERC20TotalSupply({
+    tokenAddress: icoConfigs.solanter.address,
+    provider,
+  });
+
+  const { enqueueSnackbar } = useSnackbar();
+  const theme = useTheme();
+
+  return (
+    <>
+      <Paper
+        sx={{
+          border: "5px solid #ffffff55",
+          backgroundColor: (theme) => theme.palette.background.default + "cc",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          borderRadius: "24px",
+          pt: 4,
+          pb: 4,
+        }}
+      >
+        <Container maxWidth={"md"}>
+          <Typography variant={"h4"}>Contracts Details.</Typography>
+          <Box sx={{ minHeight: 40 }} />
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              gap: 2,
+              p: 2,
+              pt: 1,
+              pb: 1,
+              borderRadius: "24px",
+              backgroundColor: (theme) => theme.palette.background.paper,
+              backdropFilter: "blur(3px)",
+              position: "relative",
+              zIndex: 1,
+              [theme.breakpoints.down("sm")]: {
+                flexDirection: "column",
+              },
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 2,
+              }}
+            >
+              <FeatherIcon size={24} icon={"code"} />
+              <Typography
+                variant={"body2"}
+                sx={{ fontSize: "1em", fontWeight: 500 }}
+              >
+                Presale Contract Address
+              </Typography>
+            </Box>
+            {
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 1,
+                  [theme.breakpoints.down("sm")]: {
+                    flexDirection: "column",
+                  },
+                }}
+              >
+                <Typography
+                  variant={"body2"}
+                  sx={{
+                    fontSize: "0.8em",
+                    fontWeight: 500,
+                    fontFamily: "monospace",
+                  }}
+                >
+                  {`${icoConfigs.ico}`}
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Tooltip title={"Copy Address"}>
+                    <IconButton
+                      size={"small"}
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${icoConfigs.ico}`);
+                        enqueueSnackbar("Copied to clipboard", {
+                          variant: "success",
+                        });
+                      }}
+                    >
+                      <FeatherIcon size={24} icon={"copy"} />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title={"View On Explorer"}>
+                    <IconButton
+                      target={"_blank"}
+                      href={`${chain.explorer}address/${icoConfigs.ico}#code`}
+                    >
+                      <FeatherIcon size={24} icon={"link-2"} />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </Box>
+            }
+          </Box>
+          <Box sx={{ minHeight: 10 }} />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              gap: 2,
+              p: 2,
+              pt: 1,
+              pb: 1,
+              borderRadius: "24px",
+              backgroundColor: (theme) => theme.palette.background.paper,
+              backdropFilter: "blur(3px)",
+              position: "relative",
+              zIndex: 1,
+              [theme.breakpoints.down("sm")]: {
+                flexDirection: "column",
+              },
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 2,
+              }}
+            >
+              <FeatherIcon size={24} icon={"code"} />
+              <Typography
+                variant={"body2"}
+                sx={{ fontSize: "1em", fontWeight: 500 }}
+              >
+                SOLT Token Address
+              </Typography>
+            </Box>
+            {
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 1,
+                  [theme.breakpoints.down("sm")]: {
+                    flexDirection: "column",
+                  },
+                }}
+              >
+                <Typography
+                  variant={"body2"}
+                  sx={{
+                    fontSize: "0.8em",
+                    fontWeight: 500,
+                    fontFamily: "monospace",
+                  }}
+                >
+                  {`${icoConfigs.solanter.address}`}
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Tooltip title={"Copy Address"}>
+                    <IconButton
+                      size={"small"}
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          `${icoConfigs.solanter.address}`
+                        );
+                        enqueueSnackbar("Copied to clipboard", {
+                          variant: "success",
+                        });
+                      }}
+                    >
+                      <FeatherIcon size={24} icon={"copy"} />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title={"View On Explorer"}>
+                    <IconButton
+                      target={"_blank"}
+                      href={`${chain.explorer}token/${icoConfigs.solanter.address}#balances`}
+                    >
+                      <FeatherIcon size={24} icon={"link-2"} />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </Box>
+            }
+          </Box>
+          <Box sx={{ minHeight: 10 }} />
+          <Grid container spacing={1}>
+            <Grid item xs={6}>
+              <InfoLine
+                title={"Token Symbol"}
+                value={icoConfigs.solanter.symbol}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <InfoLine title={"Token Name"} value={icoConfigs.solanter.name} />
+            </Grid>
+            <Grid item xs={6}>
+              <InfoLine
+                title={"Token Decimals"}
+                value={icoConfigs.solanter.decimals}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <InfoLine
+                title={"Token Decimals"}
+                value={
+                  solanterTotalSupply.data?.value
+                    ? formatMoneyBigNumber(
+                        solanterTotalSupply.data?.value,
+                        chain.id === 5
+                          ? icoConfigs.solanter.decimals + 18
+                          : icoConfigs.solanter.decimals
+                      )
+                    : 0
+                }
+              />
+            </Grid>
+          </Grid>
+        </Container>
+      </Paper>
+    </>
+  );
+};
+
+const InfoLine = ({ title, value }) => {
+  const { enqueueSnackbar } = useSnackbar();
+  const theme = useTheme();
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        width: "100%",
+        gap: 2,
+        p: 2,
+        pt: 1,
+        pb: 1,
+        borderRadius: "24px",
+        backgroundColor: (theme) => theme.palette.background.paper,
+        backdropFilter: "blur(3px)",
+        position: "relative",
+        zIndex: 1,
+        [theme.breakpoints.down("sm")]: {
+          flexDirection: "column",
+        },
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 1,
+        }}
+      >
+        <FeatherIcon size={24} icon={"info"} />
+        <Typography
+          variant={"body2"}
+          sx={{ fontSize: "0.8em", fontWeight: 500 }}
+        >
+          {title}
+        </Typography>
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 1,
+          [theme.breakpoints.down("sm")]: {
+            flexDirection: "column",
+          },
+        }}
+      >
+        <Typography
+          variant={"body2"}
+          sx={{
+            fontSize: "1em",
+            fontWeight: 800,
+          }}
+        >
+          {`${value}`}
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Tooltip title={"Copy"}>
+            <IconButton
+              size={"small"}
+              onClick={() => {
+                navigator.clipboard.writeText(`${value}`);
+                enqueueSnackbar("Copied to clipboard", {
+                  variant: "success",
+                });
+              }}
+            >
+              <FeatherIcon size={24} icon={"copy"} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+InfoLine.propTypes = {
+  title: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired,
+};
 
 const ReferralDashboard = ({ scrollToBuy }) => {
   const {
@@ -1246,67 +1598,87 @@ const HowToBuy2 = ({ scrollToBuy }) => {
       }}
     >
       <Container
-        maxWidth={"sm"}
+        maxWidth={"md"}
         sx={{
           backdropFilter: "blur(10px)",
           backgroundColor: (theme) => theme.palette.background.paper + "99",
           borderRadius: "24px",
+          m: 2,
           pt: 6,
           pb: 7,
           mt: 4,
           mb: 4,
         }}
       >
-        <Typography variant={"h5"}>Buy BNB with card</Typography>
-        <Box sx={{ minHeight: 10 }} />
-        <Typography variant={"body2"} sx={{ fontSize: "1em" }}>
-          Visit{" "}
-          <Link
-            href={"https://www.moonpay.com/buy"}
-            target={"_blank"}
-            sx={{ color: "#1A63A6", fontWeight: 800 }}
-          >
-            MoonPay
-          </Link>{" "}
-          this will allow you to purchase BNB that will be sent to your wallet.
-          You will then be able to use this BNB to purchase SOLT. Visit{" "}
-          <Link
-            href={"https://www.moonpay.com/buy"}
-            target={"_blank"}
-            sx={{ color: "#1A63A6", fontWeight: 800 }}
-          >
-            MoonPay
-          </Link>{" "}
-          to begin and follow the on screen steps. We recommend purchasing a
-          minimum $10 worth of BNB to cover the minimum SOLT purchase.
-        </Typography>
-
-        <br />
-        <Typography variant={"h5"}>Buy SOLT with BNB</Typography>
-        <Box sx={{ minHeight: 10 }} />
-        <Typography variant={"body2"} sx={{ fontSize: "1em" }}>
-          Once you have sufficient BNB in your wallet (if you do not have enough
-          USDT or BNB, please read option 1 first), you can now swap your BNB
-          for SOLT. Type in the amount of SOLT you wish to purchase ($10 minimum
-          ) click “Buy with BNB”. Your wallet provider will ask you to confirm
-          the transaction and will also show you the cost of gas
-        </Typography>
-
-        <br />
-        <Typography variant={"h5"}>Buy SOLT with USDT</Typography>
-        <Box sx={{ minHeight: 10 }} />
-        <Typography variant={"body2"} sx={{ fontSize: "1em" }}>
-          Please ensure you have at least $20 of USDT in your wallet before
-          commencing the transaction. Type in the amount of SOLT you wish to
-          purchase ($15 minimum). Click “Convert USDT”. You will then be asked
-          to approve the purchase TWICE. The first approval is for the USDT
-          contract and the second is for the transaction amount. Please ensure
-          you go through both approval steps in order to complete the
-          transaction.
-        </Typography>
-        <br />
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={4}>
+            <HowToBuy2Card
+              img={hand}
+              text={
+                <>
+                  Visit{" "}
+                  <Link
+                    href={"https://www.moonpay.com/buy"}
+                    target={"_blank"}
+                    sx={{ color: "#1A63A6", fontWeight: 800 }}
+                  >
+                    MoonPay
+                  </Link>{" "}
+                  this will allow you to purchase BNB that will be sent to your
+                  wallet. You will then be able to use this BNB to purchase
+                  SOLT. Visit{" "}
+                  <Link
+                    href={"https://www.moonpay.com/buy"}
+                    target={"_blank"}
+                    sx={{ color: "#1A63A6", fontWeight: 800 }}
+                  >
+                    MoonPay
+                  </Link>{" "}
+                  to begin and follow the on screen steps. We recommend
+                  purchasing a minimum $10 worth of BNB to cover the minimum
+                  SOLT purchase.
+                </>
+              }
+              title={"Buy BNB with card"}
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <HowToBuy2Card
+              img={phone}
+              text={
+                <>
+                  Once you have sufficient BNB in your wallet (if you do not
+                  have enough USDT or BNB, please read option 1 first), you can
+                  now swap your BNB for SOLT. Type in the amount of SOLT you
+                  wish to purchase ($10 minimum ) click “Buy with BNB”. Your
+                  wallet provider will ask you to confirm the transaction and
+                  will also show you the cost of gas
+                </>
+              }
+              title={"Buy SOLT with BNB"}
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <HowToBuy2Card
+              img={wallet}
+              text={
+                <>
+                  Please ensure you have at least $20 of USDT in your wallet
+                  before commencing the transaction. Type in the amount of SOLT
+                  you wish to purchase ($15 minimum). Click “Convert USDT”. You
+                  will then be asked to approve the purchase TWICE. The first
+                  approval is for the USDT contract and the second is for the
+                  transaction amount. Please ensure you go through both approval
+                  steps in order to complete the transaction.
+                </>
+              }
+              title={"Buy SOLT with USDT"}
+            />
+          </Grid>
+        </Grid>
         <Box
           sx={{
+            mt: 6,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -1339,6 +1711,42 @@ const HowToBuy2 = ({ scrollToBuy }) => {
 
 HowToBuy2.propTypes = {
   scrollToBuy: PropTypes.func.isRequired,
+};
+
+const HowToBuy2Card = ({ img, title, text }) => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        flexDirection: "column",
+      }}
+    >
+      <Box
+        sx={{
+          minHeight: 140,
+        }}
+      >
+        <img src={img} alt={title} height={120} />
+      </Box>
+      <Box sx={{ minHeight: 10 }} />
+      <Typography variant={"h5"}>{title}</Typography>
+      <Box sx={{ minHeight: 10 }} />
+      <Typography
+        variant={"body2"}
+        sx={{ fontSize: "1em", textAlign: "justify" }}
+      >
+        {text}
+      </Typography>
+    </Box>
+  );
+};
+
+HowToBuy2Card.propTypes = {
+  img: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  text: PropTypes.node.isRequired,
 };
 
 const HowToBuy = ({ scrollToBuy }) => {
