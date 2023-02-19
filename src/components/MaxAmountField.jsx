@@ -20,6 +20,7 @@ import { useSnackbar } from "notistack";
 import useWalletContext from "../hooks/useWalletContext";
 import BarredProgress from "./Progress/BarredProgress";
 import { useTheme } from "@mui/system";
+import icoConfigs from "../configs/icoConfigs";
 
 export const BuyModal = ({
   open,
@@ -50,7 +51,7 @@ export const BuyModal = ({
   useEffect(() => {
     if (Number(amountOut?.formatted) < Number(minBuy?.formatted)) {
       setInError(
-        `Minimum buy is ${minBuy?.formatted} ${process.env.TOKEN_NAME}`
+        `Minimum buy is ${minBuy?.formatted} ${icoConfigs.solanter.name}`
       );
     } else {
       if (!useMax && Number(value) > Number(balance?.formatted)) {
@@ -139,7 +140,7 @@ export const BuyModal = ({
       title={
         waitingForNetwork
           ? "Reading On Chain Data..."
-          : "Buy " + process.env.TOKEN_NAME
+          : "Buy " + icoConfigs.solanter.name
       }
       value={value}
       inError={inError}
@@ -307,7 +308,7 @@ export const AmountDialog = ({
               "" +
               truncNumber(amountOut?.formatted, 2) +
               " " +
-              process.env.TOKEN_NAME}
+              icoConfigs.solanter.name}
           </Alert>
         )}
       </DialogContent>
