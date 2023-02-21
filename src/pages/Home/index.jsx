@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/system";
 import Button from "@mui/material/Button";
-import { createRef, useCallback, useState } from "react";
+import { createRef, useCallback, useEffect, useState } from "react";
 import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
 import { FillBar } from "../../components/FillBar";
@@ -801,6 +801,22 @@ const IcoDashboard = ({ scrollToBuy }) => {
     setOpen(true);
   }, []);
 
+  useEffect(() => {
+    if (
+      ico.presaleData.data?.hasEnded &&
+      ico.presaleData.data?.vestingInterval?.seconds
+    ) {
+      const interval = setInterval(() => {
+        ico.userPresaleData.refetch();
+      }, ico.presaleData.data?.vestingInterval?.seconds * 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [
+    ico.presaleData.data?.hasEnded,
+    ico.presaleData.data?.vestingInterval?.seconds,
+  ]);
+
   return (
     <Box
       sx={{
@@ -871,6 +887,7 @@ const IcoDashboard = ({ scrollToBuy }) => {
                   borderRadius: 12,
                   flexBasis: "100%",
                   width: "100%",
+                  maxHeight: "26px",
                 }}
               >
                 <FillBar
@@ -888,7 +905,9 @@ const IcoDashboard = ({ scrollToBuy }) => {
                 sx={{ fontWeight: 900, fontSize: "2em" }}
               >
                 {ico.presaleData.data?.hasStarted
-                  ? `Stage 1 has started`
+                  ? ico.presaleData.data?.hasEnded
+                    ? "Stage 1 has ended"
+                    : `Stage 1 has started`
                   : `Stage 1 will start Soon`}
               </Typography>
               <Box
@@ -919,161 +938,163 @@ const IcoDashboard = ({ scrollToBuy }) => {
                   }
                 />
               </Box>
-              <Box
-                sx={{
-                  width: "100%",
-                  textAlign: "center",
-                }}
-              >
-                <Typography
-                  variant={"subtitle1"}
-                  sx={{ fontWeight: 400, fontSize: "1em" }}
+              {!ico.presaleData.data?.hasEnded && (
+                <Box
+                  sx={{
+                    width: "100%",
+                    textAlign: "center",
+                  }}
                 >
-                  Enter Presale
-                </Typography>
-                <Typography
-                  variant={"subtitle1"}
-                  sx={{ fontWeight: 700, fontSize: "1em" }}
-                >
-                  1 USDT ={" "}
-                  {1 / Number(ico.presaleData.data?.usdtPrice.formatted)} SOLT
-                </Typography>
-
-                <Typography
-                  variant={"subtitle1"}
-                  sx={{ fontWeight: 700, fontSize: "1em" }}
-                >
-                  1 BNB ={" "}
-                  {formatMoneyNumber(
-                    Number(ico.bnbPrice.data?.formatted) /
-                      Number(ico.presaleData.data?.usdtPrice.formatted)
-                  )}{" "}
-                  SOLT
-                </Typography>
-                <br />
-                {(!walletContext.isConnected ||
-                  !walletContext.isCorrectNetwork) && (
-                  <Button
-                    variant={"contained"}
-                    sx={{
-                      backgroundColor: "white",
-                      color: (theme) => theme.palette.primary.light,
-                      textTransform: "none",
-                      p: "12px 32px",
-                      borderRadius: "50px",
-                      fontWeight: "900",
-                      letterSpacing: "1px",
-                      minWidth: "40%",
-                      "&:hover": {
-                        color: "white",
-                      },
-                    }}
-                    onClick={async () => {
-                      if (
-                        walletContext.isConnected &&
-                        !walletContext.isCorrectNetwork
-                      ) {
-                        await walletContext.requestSwitchNetwork();
-                        setTimeout(() => {
-                          scrollToBuy();
-                        }, 500);
-                      } else {
-                        await walletContext.openConnectModal();
-                        setTimeout(() => {
-                          scrollToBuy();
-                        }, 500);
-                      }
-                    }}
+                  <Typography
+                    variant={"subtitle1"}
+                    sx={{ fontWeight: 400, fontSize: "1em" }}
                   >
-                    {walletContext.isConnected &&
-                    !walletContext.isCorrectNetwork
-                      ? "Switch Network"
-                      : "Connect Wallet"}
-                  </Button>
-                )}
-                {walletContext.isConnected &&
-                  walletContext.isCorrectNetwork && (
-                    <Box
+                    Enter Presale
+                  </Typography>
+                  <Typography
+                    variant={"subtitle1"}
+                    sx={{ fontWeight: 700, fontSize: "1em" }}
+                  >
+                    1 USDT ={" "}
+                    {1 / Number(ico.presaleData.data?.usdtPrice.formatted)} SOLT
+                  </Typography>
+
+                  <Typography
+                    variant={"subtitle1"}
+                    sx={{ fontWeight: 700, fontSize: "1em" }}
+                  >
+                    1 BNB ={" "}
+                    {formatMoneyNumber(
+                      Number(ico.bnbPrice.data?.formatted) /
+                        Number(ico.presaleData.data?.usdtPrice.formatted)
+                    )}{" "}
+                    SOLT
+                  </Typography>
+                  <br />
+                  {(!walletContext.isConnected ||
+                    !walletContext.isCorrectNetwork) && (
+                    <Button
+                      variant={"contained"}
                       sx={{
-                        gap: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        backgroundColor: "white",
+                        color: (theme) => theme.palette.primary.light,
+                        textTransform: "none",
+                        p: "12px 32px",
+                        borderRadius: "50px",
+                        fontWeight: "900",
+                        letterSpacing: "1px",
+                        minWidth: "40%",
+                        "&:hover": {
+                          color: "white",
+                        },
+                      }}
+                      onClick={async () => {
+                        if (
+                          walletContext.isConnected &&
+                          !walletContext.isCorrectNetwork
+                        ) {
+                          await walletContext.requestSwitchNetwork();
+                          setTimeout(() => {
+                            scrollToBuy();
+                          }, 500);
+                        } else {
+                          await walletContext.openConnectModal();
+                          setTimeout(() => {
+                            scrollToBuy();
+                          }, 500);
+                        }
                       }}
                     >
-                      <Button
-                        disabled={
-                          ico.presaleData.data?.hasEnded ||
-                          !ico.presaleData.data?.hasStarted ||
-                          ico.bnbBalance.balance?.value?.eq(0)
-                        }
-                        variant={"contained"}
-                        sx={{
-                          backgroundColor: "white",
-                          color: (theme) => theme.palette.primary.light,
-                          textTransform: "none",
-                          p: "12px 32px",
-                          borderRadius: "50px",
-                          fontWeight: "900",
-                          letterSpacing: "1px",
-                          minWidth: "40%",
-                          "&:hover": {
-                            color: "white",
-                          },
-                        }}
-                        onClick={async () => {
-                          openBuyModal("BNB");
-                        }}
-                      >
-                        Buy With BNB
-                      </Button>
-                      <Button
-                        disabled={
-                          ico.presaleData.data?.hasEnded ||
-                          !ico.presaleData.data?.hasStarted ||
-                          !ico.hasUsdtBalance ||
-                          busy
-                        }
-                        variant={"contained"}
-                        sx={{
-                          backgroundColor: "white",
-                          color: (theme) => theme.palette.primary.light,
-                          textTransform: "none",
-                          p: "12px 32px",
-                          borderRadius: "50px",
-                          fontWeight: "900",
-                          letterSpacing: "1px",
-                          minWidth: "40%",
-                          "&:hover": {
-                            color: "white",
-                          },
-                        }}
-                        onClick={async () => {
-                          if (!ico.approved) {
-                            setBusy(true);
-                            try {
-                              await ico.approveUSDT(walletContext.signer);
-                              enqueueSnackbar("Approved USDT", {
-                                variant: "success",
-                              });
-                            } catch (e) {
-                              enqueueSnackbar(e.reason || e.message, {
-                                variant: "error",
-                              });
-                            } finally {
-                              setBusy(false);
-                            }
-                          } else {
-                            openBuyModal("USDT");
-                          }
-                        }}
-                      >
-                        {busy && <BarredProgress sx={{ mr: 1 }} width={18} />}
-                        {ico.approved ? `Buy With USDT` : `Approve USDT`}
-                      </Button>
-                    </Box>
+                      {walletContext.isConnected &&
+                      !walletContext.isCorrectNetwork
+                        ? "Switch Network"
+                        : "Connect Wallet"}
+                    </Button>
                   )}
-              </Box>
+                  {walletContext.isConnected &&
+                    walletContext.isCorrectNetwork && (
+                      <Box
+                        sx={{
+                          gap: 1,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Button
+                          disabled={
+                            ico.presaleData.data?.hasEnded ||
+                            !ico.presaleData.data?.hasStarted ||
+                            ico.bnbBalance.balance?.value?.eq(0)
+                          }
+                          variant={"contained"}
+                          sx={{
+                            backgroundColor: "white",
+                            color: (theme) => theme.palette.primary.light,
+                            textTransform: "none",
+                            p: "12px 32px",
+                            borderRadius: "50px",
+                            fontWeight: "900",
+                            letterSpacing: "1px",
+                            minWidth: "40%",
+                            "&:hover": {
+                              color: "white",
+                            },
+                          }}
+                          onClick={async () => {
+                            openBuyModal("BNB");
+                          }}
+                        >
+                          Buy With BNB
+                        </Button>
+                        <Button
+                          disabled={
+                            ico.presaleData.data?.hasEnded ||
+                            !ico.presaleData.data?.hasStarted ||
+                            !ico.hasUsdtBalance ||
+                            busy
+                          }
+                          variant={"contained"}
+                          sx={{
+                            backgroundColor: "white",
+                            color: (theme) => theme.palette.primary.light,
+                            textTransform: "none",
+                            p: "12px 32px",
+                            borderRadius: "50px",
+                            fontWeight: "900",
+                            letterSpacing: "1px",
+                            minWidth: "40%",
+                            "&:hover": {
+                              color: "white",
+                            },
+                          }}
+                          onClick={async () => {
+                            if (!ico.approved) {
+                              setBusy(true);
+                              try {
+                                await ico.approveUSDT(walletContext.signer);
+                                enqueueSnackbar("Approved USDT", {
+                                  variant: "success",
+                                });
+                              } catch (e) {
+                                enqueueSnackbar(e.reason || e.message, {
+                                  variant: "error",
+                                });
+                              } finally {
+                                setBusy(false);
+                              }
+                            } else {
+                              openBuyModal("USDT");
+                            }
+                          }}
+                        >
+                          {busy && <BarredProgress sx={{ mr: 1 }} width={18} />}
+                          {ico.approved ? `Buy With USDT` : `Approve USDT`}
+                        </Button>
+                      </Box>
+                    )}
+                </Box>
+              )}
             </DarkCard>
           </Grid>
           <Grid
@@ -1109,7 +1130,11 @@ const IcoDashboard = ({ scrollToBuy }) => {
               />
               <LineDetails
                 title={"End Date"}
-                value={ico.presaleData.data?.endTime?.formatted}
+                value={new Date(
+                  (ico.presaleData.data?.listingTime.seconds +
+                    ico.presaleData.data?.vestingPeriod.seconds) *
+                    1000
+                ).toLocaleString()}
               />
               <LineDetails
                 title={"Unlock Interval"}
