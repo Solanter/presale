@@ -8,6 +8,7 @@ import {
   Paper,
   Skeleton,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/system";
 import Button from "@mui/material/Button";
@@ -98,8 +99,63 @@ const HomePage = () => {
         <ContractData />
         <Box sx={{ minHeight: 40 }} />
       </Container>
+      <Box
+        sx={{
+          backgroundColor: "#000000" + "55",
+          pt: 4,
+          pb: 2,
+        }}
+      >
+        <Container maxWidth={"lg"}>
+          <Grid container>
+            <Grid item xs={12} md={6}>
+              <Link href={"https://solanter.io/"} target={"_blank"}>
+                <img src={logoUrl} />
+              </Link>
+            </Grid>
+            <Grid item xs={12} md={6} container>
+              <Grid item xs={12} sm={4}>
+                <Typography variant={"h6"}>About us</Typography>
+                <MyLink href={"https://solanter.io/"}>Home</MyLink>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Typography variant={"h6"}>Documents</Typography>
+                <MyLink href={"https://solanter.gitbook.io/whitepaper"}>
+                  WhitePaper
+                </MyLink>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Typography variant={"h6"}>Social</Typography>
+                <MyLink href={process.env.TWITTER}>Twitter</MyLink>
+                <br />
+                <MyLink href={process.env.TELEGRAM}>Telegram</MyLink>
+                <br />
+                <MyLink href={process.env.YOUTUBE}>Youtube</MyLink>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
     </Page>
   );
+};
+
+const MyLink = ({ children, ...props }) => {
+  return (
+    <Link
+      sx={{
+        color: (theme) => theme.palette.text.secondary,
+        textDecoration: "none",
+      }}
+      target={"_blank"}
+      {...props}
+    >
+      {children}
+    </Link>
+  );
+};
+MyLink.propTypes = {
+  children: PropTypes.node,
 };
 
 export default HomePage;
@@ -916,27 +972,31 @@ const IcoDashboard = ({ scrollToBuy }) => {
                   textAlign: "center",
                 }}
               >
-                <Typography
-                  variant={"subtitle1"}
-                  sx={{ fontWeight: 600, fontSize: "1em" }}
-                >
-                  {ico.presaleData.data?.hasStarted
-                    ? ico.presaleData.data?.hasEnded
-                      ? "Claim Bought tokens in"
-                      : "Sale ends in"
-                    : "Sale starts in"}
-                </Typography>
-                <CountDown
-                  date={
-                    ico.presaleData.data?.hasStarted
+                {false && (
+                  <Typography
+                    variant={"subtitle1"}
+                    sx={{ fontWeight: 600, fontSize: "1em" }}
+                  >
+                    {ico.presaleData.data?.hasStarted
                       ? ico.presaleData.data?.hasEnded
-                        ? ico.presaleData.data?.listingTime?.seconds
-                        : ico.presaleData.data?.endTime?.seconds
-                      : ico.presaleData.data?.startTime?.seconds > 0
-                      ? ico.presaleData.data?.startTime?.seconds
-                      : (Date.now() + 24 * 60 * 60 * 1000 * 10) / 1000
-                  }
-                />
+                        ? "Claim Bought tokens in"
+                        : "Sale ends in"
+                      : "Sale starts in"}
+                  </Typography>
+                )}
+                {false && (
+                  <CountDown
+                    date={
+                      ico.presaleData.data?.hasStarted
+                        ? ico.presaleData.data?.hasEnded
+                          ? ico.presaleData.data?.listingTime?.seconds
+                          : ico.presaleData.data?.endTime?.seconds
+                        : ico.presaleData.data?.startTime?.seconds > 0
+                        ? ico.presaleData.data?.startTime?.seconds
+                        : (Date.now() + 24 * 60 * 60 * 1000 * 10) / 1000
+                    }
+                  />
+                )}
               </Box>
               {!ico.presaleData.data?.hasEnded && (
                 <Box
@@ -1687,6 +1747,8 @@ HowToBuy.propTypes = {
 
 const Header = ({ scrollToBuy }) => {
   const settings = useConfigs();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Box
@@ -1698,7 +1760,11 @@ const Header = ({ scrollToBuy }) => {
       }}
     >
       <SocialIcons />
-      <img src={logoUrl} />
+      {!isMobile && (
+        <Link href={"https://solanter.io/"} target={"_blank"}>
+          <img src={logoUrl} />
+        </Link>
+      )}
       <Box
         sx={{
           display: "flex",
@@ -1747,8 +1813,12 @@ const SocialIcons = () => {
       sx={{
         display: "flex",
         gap: 1,
+        alignItems: "center",
       }}
     >
+      <Typography variant={"h5"} sx={{ mr: 2 }}>
+        Home
+      </Typography>
       <CircleIconButton
         href={process.env.TWITTER}
         icon={<FeatherIcon size={24} icon={"twitter"} />}
@@ -1818,7 +1888,7 @@ const Overlay = () => (
       right: 0,
       bottom: 0,
       borderRadius: "24px",
-      backdropFilter: "blur(3px)",
+      //backdropFilter: "blur(3px)",
     }}
   />
 );
@@ -1839,7 +1909,7 @@ const DarkCard = ({ children, sx, ...props }) => {
             ? theme.palette.background.default + 55
             : theme.palette.background.default + "66",
         gap: 2,
-        backdropFilter: "blur(10px)",
+        backdropFilter: "blur(3px)",
         height: "100%",
         ...sx,
       }}

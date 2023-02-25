@@ -78,7 +78,7 @@ export function formatMoneyBigNumber(
   number,
   decimals = 18,
   minDecimals = 0,
-  maxDecimals = 2
+  maxDecimals = 6
 ) {
   const n = ethers.utils.formatUnits(number, decimals);
   return new Intl.NumberFormat("en-US", {
