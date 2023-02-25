@@ -1816,9 +1816,14 @@ const SocialIcons = () => {
         alignItems: "center",
       }}
     >
-      <Typography variant={"h5"} sx={{ mr: 2 }}>
-        Home
-      </Typography>
+      <MyLink
+        href={"https://solanter.io"}
+        sx={{ color: "white", textDecoration: "none" }}
+      >
+        <Typography variant={"h5"} sx={{ mr: 2 }}>
+          Home
+        </Typography>
+      </MyLink>
       <CircleIconButton
         href={process.env.TWITTER}
         icon={<FeatherIcon size={24} icon={"twitter"} />}
