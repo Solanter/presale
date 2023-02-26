@@ -392,7 +392,7 @@ const ContractData = () => {
             </Grid>
             <Grid item xs={6}>
               <InfoLine
-                title={"Token Decimals"}
+                title={"Token Total Supply"}
                 value={
                   solanterTotalSupply.data?.value
                     ? formatMoneyBigNumber(
@@ -937,23 +937,27 @@ const IcoDashboard = ({ scrollToBuy }) => {
             <DarkCard>
               <img src={liveIcon} alt={"live"} width={240} />
 
-              <Box
-                sx={{
-                  background: "grey",
-                  borderRadius: 12,
-                  flexBasis: "100%",
-                  width: "100%",
-                  maxHeight: "26px",
-                }}
-              >
-                <FillBar
-                  total={ico.presaleData.data?.totalTobeRaised?.formatted}
-                  raised={ico.presaleData.data?.totalUSDValueRaised?.formatted}
-                  percentage={
-                    100 - (ico.presaleData.data?.raisedPercentage || 0)
-                  }
-                />
-              </Box>
+              {false && (
+                <Box
+                  sx={{
+                    background: "grey",
+                    borderRadius: 12,
+                    flexBasis: "100%",
+                    width: "100%",
+                    maxHeight: "26px",
+                  }}
+                >
+                  <FillBar
+                    total={ico.presaleData.data?.totalTobeRaised?.formatted}
+                    raised={
+                      ico.presaleData.data?.totalUSDValueRaised?.formatted
+                    }
+                    percentage={
+                      100 - (ico.presaleData.data?.raisedPercentage || 0)
+                    }
+                  />
+                </Box>
+              )}
             </DarkCard>
             <DarkCard>
               <Typography
@@ -1393,7 +1397,12 @@ const Description = ({ onHowToBuyCick, scrollToBuy, scrollToReferral }) => {
         }}
       >
         {false && <Typography variant={"h2"}>Solanter Presale</Typography>}
-        <Typography variant={"h4"}>
+        <Typography
+          variant={"h4"}
+          sx={{
+            textTransform: "capitalize",
+          }}
+        >
           Get paid every 10 seconds with our passive income ecosystem
         </Typography>
         <Box sx={{ minHeight: 24 }} />
